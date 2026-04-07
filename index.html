@@ -1,0 +1,1480 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MathRév — Ton site de révisions maths</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800;900&family=Space+Mono:wght@400;700&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#09090f;
+  --surface:#111118;
+  --surface2:#191924;
+  --border:#252535;
+  --border2:#303048;
+  --text:#f0f0ff;
+  --text2:#9090b0;
+  --text3:#454560;
+  --blue:#5b8def;
+  --blue2:#7aaeff;
+  --green:#2ecc8f;
+  --red:#ff4f6d;
+  --orange:#ff9f43;
+  --purple:#a78bfa;
+  --yellow:#f9d94e;
+  --teal:#00d4aa;
+  --pink:#ff6fa8;
+}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'Nunito',sans-serif;min-height:100vh;overflow-x:hidden;}
+
+/* BG ANIMATED */
+.bg-glow{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
+.bg-glow::before{content:'';position:absolute;top:-30%;left:-20%;width:60%;height:60%;background:radial-gradient(circle,rgba(91,141,239,.08) 0%,transparent 70%);animation:floatBg 8s ease-in-out infinite;}
+.bg-glow::after{content:'';position:absolute;bottom:-20%;right:-10%;width:50%;height:50%;background:radial-gradient(circle,rgba(46,204,143,.07) 0%,transparent 70%);animation:floatBg 10s ease-in-out infinite reverse;}
+@keyframes floatBg{0%,100%{transform:translate(0,0);}50%{transform:translate(30px,-20px);}}
+
+/* NAV */
+nav{
+  position:sticky;top:0;z-index:200;
+  background:rgba(9,9,15,.88);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  padding:0 20px;height:60px;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+}
+.nav-logo{
+  font-family:'Syne',sans-serif;font-size:22px;font-weight:900;
+  background:linear-gradient(135deg,var(--blue2),var(--teal));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  letter-spacing:-1px;white-space:nowrap;flex-shrink:0;
+}
+.nav-center{display:flex;gap:4px;flex-wrap:wrap;}
+.nav-btn{
+  padding:6px 14px;border-radius:8px;font-size:13px;font-weight:700;
+  cursor:pointer;transition:all .2s;color:var(--text2);
+  border:1px solid transparent;font-family:'Nunito',sans-serif;background:none;
+}
+.nav-btn:hover{color:var(--text);background:var(--surface2);}
+.nav-btn.active{color:#fff;background:var(--blue);border-color:var(--blue);}
+.level-badge{
+  display:flex;align-items:center;gap:8px;
+  background:var(--surface2);border:1px solid var(--border2);
+  border-radius:10px;padding:5px 12px;cursor:pointer;
+  font-size:13px;font-weight:800;color:var(--text);
+  transition:all .2s;flex-shrink:0;
+}
+.level-badge:hover{border-color:var(--blue);}
+.level-dot{width:8px;height:8px;border-radius:50%;background:var(--yellow);}
+
+/* LEVEL SELECTOR MODAL */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(8px);
+  z-index:500;display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .3s;
+}
+.modal-overlay.show{opacity:1;pointer-events:all;}
+.modal{
+  background:var(--surface);border:1px solid var(--border2);border-radius:24px;
+  padding:32px;max-width:600px;width:90%;
+  transform:scale(.9);transition:transform .3s;
+}
+.modal-overlay.show .modal{transform:scale(1);}
+.modal-title{font-family:'Syne',sans-serif;font-size:28px;font-weight:900;margin-bottom:8px;}
+.modal-sub{color:var(--text2);font-size:15px;margin-bottom:24px;}
+.level-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:24px;}
+.level-card{
+  background:var(--surface2);border:2px solid var(--border);border-radius:16px;
+  padding:20px 16px;text-align:center;cursor:pointer;
+  transition:all .25s;position:relative;overflow:hidden;
+}
+.level-card::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .25s;}
+.level-card:hover{border-color:var(--border2);transform:translateY(-3px);}
+.level-card.selected{border-color:var(--blue);}
+.level-card.selected::before{opacity:1;background:rgba(91,141,239,.08);}
+.level-emoji{font-size:32px;margin-bottom:10px;}
+.level-name{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;margin-bottom:4px;}
+.level-desc{font-size:11px;color:var(--text2);font-weight:600;}
+.modal-close{
+  width:100%;padding:14px;background:linear-gradient(135deg,var(--blue),#3a70d4);
+  color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:800;
+  cursor:pointer;font-family:'Nunito',sans-serif;transition:all .2s;
+}
+.modal-close:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(91,141,239,.4);}
+
+/* MAIN */
+main{position:relative;z-index:1;max-width:1140px;margin:0 auto;padding:28px 20px;}
+
+/* PAGE HERO */
+.hero{text-align:center;padding:40px 0 32px;animation:fadeUp .5s ease both;}
+.hero h1{font-family:'Syne',sans-serif;font-size:clamp(32px,6vw,58px);font-weight:900;letter-spacing:-2px;line-height:1.1;margin-bottom:14px;}
+.hero h1 .grad{background:linear-gradient(135deg,var(--blue2),var(--teal));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hero p{font-size:17px;color:var(--text2);font-weight:600;max-width:520px;margin:0 auto 28px;}
+.hero-stats{display:flex;gap:24px;justify-content:center;flex-wrap:wrap;}
+.hero-stat{text-align:center;}
+.hero-stat-val{font-family:'Space Mono',monospace;font-size:28px;font-weight:700;color:var(--blue2);}
+.hero-stat-label{font-size:12px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:1px;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+/* SECTIONS */
+.section{display:none;}
+.section.active{display:block;animation:fadeUp .35s ease both;}
+
+/* TABS CONTENT */
+.section-title{
+  font-family:'Syne',sans-serif;font-size:26px;font-weight:900;
+  margin-bottom:6px;letter-spacing:-.5px;
+}
+.section-sub{color:var(--text2);font-size:14px;font-weight:600;margin-bottom:24px;}
+
+/* CHAPTER CARDS (accueil) */
+.chapters-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-bottom:32px;}
+.chapter-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:20px;
+  overflow:hidden;cursor:pointer;transition:all .25s;position:relative;
+}
+.chapter-card:hover{border-color:var(--border2);transform:translateY(-4px);box-shadow:0 16px 48px rgba(0,0,0,.5);}
+.chapter-card-top{padding:22px 22px 18px;border-bottom:1px solid var(--border);}
+.chapter-icon{font-size:36px;margin-bottom:12px;}
+.chapter-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;margin-bottom:4px;}
+.chapter-level-tag{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:2px;padding:3px 10px;border-radius:100px;display:inline-block;margin-bottom:8px;}
+.chapter-desc{font-size:13px;color:var(--text2);line-height:1.6;}
+.chapter-bottom{padding:14px 22px;display:flex;justify-content:space-between;align-items:center;}
+.chapter-meta{font-size:12px;color:var(--text3);font-weight:700;}
+.chapter-arrow{font-size:18px;color:var(--text3);}
+.progress-mini{height:4px;background:var(--border);border-radius:100px;margin-top:8px;overflow:hidden;}
+.progress-mini-fill{height:100%;border-radius:100px;background:linear-gradient(90deg,var(--blue),var(--teal));}
+
+/* LEVEL TAG COLORS */
+.tag-6e{background:rgba(167,139,250,.15);color:var(--purple);border:1px solid rgba(167,139,250,.3);}
+.tag-5e{background:rgba(91,141,239,.15);color:var(--blue2);border:1px solid rgba(91,141,239,.3);}
+.tag-4e{background:rgba(255,159,67,.15);color:var(--orange);border:1px solid rgba(255,159,67,.3);}
+.tag-3e{background:rgba(255,79,109,.15);color:var(--red);border:1px solid rgba(255,79,109,.3);}
+.tag-all{background:rgba(46,204,143,.15);color:var(--green);border:1px solid rgba(46,204,143,.3);}
+
+/* EXERCISES */
+.exo-list{display:flex;flex-direction:column;gap:14px;margin-bottom:24px;}
+.exo-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;
+}
+.exo-header{
+  padding:18px 22px;display:flex;align-items:center;gap:14px;cursor:pointer;
+  transition:background .2s;
+}
+.exo-header:hover{background:var(--surface2);}
+.exo-num{
+  width:36px;height:36px;border-radius:10px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Space Mono',monospace;font-size:14px;font-weight:700;
+  background:var(--surface2);color:var(--text2);
+}
+.exo-num.done{background:rgba(46,204,143,.15);color:var(--green);}
+.exo-info{flex:1;}
+.exo-title{font-size:15px;font-weight:800;margin-bottom:3px;}
+.exo-meta{font-size:12px;color:var(--text2);}
+.diff-stars{color:var(--yellow);font-size:13px;letter-spacing:-2px;}
+.exo-toggle{font-size:14px;color:var(--text3);transition:transform .3s;}
+.exo-toggle.open{transform:rotate(180deg);}
+.exo-body{
+  padding:0 22px;max-height:0;overflow:hidden;transition:max-height .4s ease,padding .3s;
+}
+.exo-body.open{max-height:1000px;padding:0 22px 20px;}
+.exo-problem{
+  background:var(--surface2);border:1px solid var(--border2);
+  border-radius:12px;padding:16px;margin-bottom:16px;
+  font-size:14px;line-height:1.7;color:var(--text);
+}
+.exo-problem strong{color:var(--blue2);}
+.exo-problem .formula{
+  font-family:'Space Mono',monospace;font-size:15px;
+  background:var(--bg);padding:10px 14px;border-radius:8px;margin:10px 0;
+  color:var(--teal);display:block;
+}
+.answer-zone{margin-top:14px;}
+.answer-label{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:2px;color:var(--text3);margin-bottom:8px;}
+.answer-input{
+  width:100%;background:var(--bg);border:2px solid var(--border);border-radius:10px;
+  padding:12px 16px;color:var(--text);font-size:15px;font-family:'Space Mono',monospace;
+  font-weight:700;outline:none;transition:border-color .2s;
+}
+.answer-input:focus{border-color:var(--blue);}
+.answer-input.correct{border-color:var(--green);background:rgba(46,204,143,.05);}
+.answer-input.wrong{border-color:var(--red);background:rgba(255,79,109,.05);}
+.exo-actions{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;}
+.btn-check{
+  flex:1;min-width:120px;padding:11px;background:linear-gradient(135deg,var(--blue),#3a70d4);
+  color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:800;
+  cursor:pointer;font-family:'Nunito',sans-serif;transition:all .2s;
+}
+.btn-check:hover{transform:translateY(-1px);}
+.btn-hint{
+  padding:11px 18px;background:transparent;border:1px solid var(--border2);
+  border-radius:10px;color:var(--text2);font-size:13px;font-weight:700;
+  cursor:pointer;font-family:'Nunito',sans-serif;transition:all .2s;
+}
+.btn-hint:hover{color:var(--text);border-color:var(--yellow);color:var(--yellow);}
+.btn-solution{
+  padding:11px 18px;background:transparent;border:1px solid var(--border2);
+  border-radius:10px;color:var(--text2);font-size:13px;font-weight:700;
+  cursor:pointer;font-family:'Nunito',sans-serif;transition:all .2s;
+}
+.btn-solution:hover{color:var(--green);border-color:var(--green);}
+.feedback-box{
+  margin-top:12px;padding:12px 16px;border-radius:10px;
+  font-size:13px;font-weight:700;display:none;line-height:1.6;
+}
+.feedback-box.ok{display:block;background:rgba(46,204,143,.1);border:1px solid rgba(46,204,143,.3);color:var(--green);}
+.feedback-box.ko{display:block;background:rgba(255,79,109,.1);border:1px solid rgba(255,79,109,.3);color:var(--text);}
+.feedback-box.hint{display:block;background:rgba(249,217,78,.08);border:1px solid rgba(249,217,78,.25);color:var(--yellow);}
+.feedback-box .sol-math{font-family:'Space Mono',monospace;color:var(--teal);margin-top:6px;font-size:14px;}
+
+/* QCM (Multiple choice exo) */
+.qcm-options{display:flex;flex-direction:column;gap:8px;margin-top:12px;}
+.qcm-opt{
+  padding:12px 16px;background:var(--bg);border:2px solid var(--border);
+  border-radius:10px;cursor:pointer;font-size:14px;font-weight:700;
+  transition:all .2s;display:flex;align-items:center;gap:10px;
+  font-family:'Nunito',sans-serif;
+}
+.qcm-opt:hover{border-color:var(--border2);transform:translateX(4px);}
+.qcm-opt.correct{border-color:var(--green);background:rgba(46,204,143,.1);color:var(--green);}
+.qcm-opt.wrong{border-color:var(--red);background:rgba(255,79,109,.1);color:var(--red);}
+.qcm-opt:disabled,.qcm-opt[disabled]{cursor:default;pointer-events:none;}
+.qcm-letter{width:26px;height:26px;border-radius:7px;background:var(--surface);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:var(--text2);flex-shrink:0;}
+
+/* VIDEOS */
+.videos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px;margin-bottom:24px;}
+.video-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:18px;overflow:hidden;
+  transition:all .25s;cursor:pointer;
+}
+.video-card:hover{border-color:var(--border2);transform:translateY(-4px);box-shadow:0 16px 48px rgba(0,0,0,.5);}
+.video-thumb{
+  position:relative;aspect-ratio:16/9;background:var(--surface2);overflow:hidden;
+}
+.video-thumb iframe{width:100%;height:100%;border:none;pointer-events:none;}
+.video-thumb-img{
+  width:100%;height:100%;object-fit:cover;
+  background:linear-gradient(135deg,var(--surface2),var(--bg));
+  display:flex;align-items:center;justify-content:center;
+}
+.video-play-overlay{
+  position:absolute;inset:0;background:rgba(0,0,0,.4);
+  display:flex;align-items:center;justify-content:center;
+  transition:background .2s;
+}
+.video-card:hover .video-play-overlay{background:rgba(0,0,0,.2);}
+.play-btn{
+  width:56px;height:56px;border-radius:50%;
+  background:rgba(255,255,255,.95);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 20px rgba(0,0,0,.4);
+  transition:transform .2s;
+}
+.video-card:hover .play-btn{transform:scale(1.1);}
+.play-icon{width:0;height:0;border-top:11px solid transparent;border-bottom:11px solid transparent;border-left:18px solid #111;margin-left:3px;}
+.video-info{padding:16px 18px;}
+.video-title{font-size:14px;font-weight:800;margin-bottom:4px;line-height:1.4;}
+.video-meta{font-size:12px;color:var(--text2);display:flex;align-items:center;gap:8px;}
+.video-duration{
+  background:var(--surface2);border:1px solid var(--border);border-radius:6px;
+  padding:2px 8px;font-family:'Space Mono',monospace;font-size:11px;font-weight:700;
+}
+
+/* VIDEO MODAL */
+.video-modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.92);backdrop-filter:blur(12px);
+  z-index:600;display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .3s;
+}
+.video-modal-overlay.show{opacity:1;pointer-events:all;}
+.video-modal{
+  width:90%;max-width:860px;
+  background:var(--surface);border:1px solid var(--border2);border-radius:20px;overflow:hidden;
+  transform:scale(.9);transition:transform .3s;
+}
+.video-modal-overlay.show .video-modal{transform:scale(1);}
+.video-modal-header{padding:16px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);}
+.video-modal-title{font-size:16px;font-weight:800;}
+.video-modal-close{background:var(--surface2);border:1px solid var(--border);color:var(--text2);border-radius:8px;padding:6px 12px;cursor:pointer;font-size:13px;font-weight:700;font-family:'Nunito',sans-serif;transition:all .2s;}
+.video-modal-close:hover{color:var(--text);border-color:var(--border2);}
+.video-iframe-wrap{aspect-ratio:16/9;background:#000;}
+.video-iframe-wrap iframe{width:100%;height:100%;border:none;}
+
+/* QUIZ */
+.quiz-wrap{max-width:700px;margin:0 auto;}
+.quiz-topbar{
+  background:var(--surface);border:1px solid var(--border);border-radius:16px;
+  padding:18px 22px;margin-bottom:18px;
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+}
+.quiz-prog-txt{font-size:13px;font-weight:700;color:var(--text2);}
+.prog-bar{flex:1;height:6px;background:var(--surface2);border-radius:100px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--teal));border-radius:100px;transition:width .4s;}
+.quiz-score-lbl{font-family:'Space Mono',monospace;font-size:18px;font-weight:700;color:var(--green);white-space:nowrap;}
+.q-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:20px;
+  overflow:hidden;margin-bottom:16px;animation:fadeUp .3s ease;
+}
+.q-head{padding:22px 24px 18px;border-bottom:1px solid var(--border);}
+.q-cat{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:2.5px;margin-bottom:10px;}
+.q-text{font-size:18px;font-weight:800;line-height:1.5;letter-spacing:-.3px;}
+.q-hint{font-size:12px;color:var(--text2);font-weight:600;margin-top:8px;font-family:'Space Mono',monospace;}
+.q-opts{padding:18px 24px;display:flex;flex-direction:column;gap:10px;}
+.q-opt{
+  padding:13px 18px;background:var(--bg);border:2px solid var(--border);
+  border-radius:12px;color:var(--text);font-size:14px;font-weight:700;
+  cursor:pointer;transition:all .2s;text-align:left;
+  font-family:'Nunito',sans-serif;display:flex;align-items:center;gap:12px;
+}
+.q-opt:hover:not(:disabled){border-color:var(--blue);background:rgba(91,141,239,.08);transform:translateX(4px);}
+.q-opt.correct{border-color:var(--green);background:rgba(46,204,143,.12);color:var(--green);}
+.q-opt.wrong{border-color:var(--red);background:rgba(255,79,109,.12);color:var(--red);}
+.q-opt:disabled{cursor:default;}
+.opt-ltr{width:28px;height:28px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;background:var(--surface);color:var(--text2);}
+.q-exp{
+  margin:0 24px 20px;padding:14px 16px;border-radius:12px;font-size:13px;line-height:1.7;font-weight:600;display:none;
+}
+.q-exp.show{display:block;animation:fadeUp .25s ease;}
+.q-exp.ok{background:rgba(46,204,143,.1);border:1px solid rgba(46,204,143,.25);}
+.q-exp.ko{background:rgba(255,79,109,.1);border:1px solid rgba(255,79,109,.25);}
+.q-exp .exp-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:2px;margin-bottom:6px;}
+.q-exp .exp-math{font-family:'Space Mono',monospace;font-size:14px;margin-top:6px;color:var(--teal);}
+.quiz-nav{display:flex;gap:10px;margin-top:4px;}
+.btn-next{flex:1;padding:14px;background:linear-gradient(135deg,var(--blue),#3a70d4);color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:800;cursor:pointer;transition:all .2s;font-family:'Nunito',sans-serif;}
+.btn-next:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(91,141,239,.4);}
+.btn-next:disabled{opacity:.4;pointer-events:none;}
+.btn-restart{padding:14px 20px;background:var(--surface2);color:var(--text2);border:1px solid var(--border);border-radius:12px;font-size:14px;font-weight:800;cursor:pointer;transition:all .2s;font-family:'Nunito',sans-serif;}
+.btn-restart:hover{color:var(--text);}
+
+/* QUIZ END */
+.quiz-end{
+  background:var(--surface);border:1px solid var(--border);border-radius:20px;
+  padding:40px;text-align:center;display:none;
+}
+.quiz-end.show{display:block;animation:fadeUp .4s ease;}
+.end-emoji{font-size:64px;margin-bottom:16px;}
+.end-big{font-family:'Syne',sans-serif;font-size:56px;font-weight:900;margin-bottom:8px;}
+.end-msg{font-size:18px;font-weight:700;color:var(--text2);margin-bottom:28px;}
+.end-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:28px;}
+.end-stat{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px;}
+.end-val{font-family:'Space Mono',monospace;font-size:24px;font-weight:700;margin-bottom:4px;}
+.end-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--text3);}
+.end-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+
+/* COURS SECTION */
+.cours-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;}
+.cours-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:18px;overflow:hidden;
+}
+.cours-head{padding:20px 22px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;}
+.cours-icon{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.cours-title{font-size:16px;font-weight:800;margin-bottom:2px;}
+.cours-sub{font-size:12px;color:var(--text2);}
+.cours-body{padding:18px 22px;}
+.rule{
+  border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:10px;
+  font-size:13px;color:var(--text);line-height:1.6;font-weight:600;
+}
+.rule.blue{background:rgba(91,141,239,.07);border-color:rgba(91,141,239,.25);border-left:3px solid var(--blue);}
+.rule.green{background:rgba(46,204,143,.07);border-color:rgba(46,204,143,.25);border-left:3px solid var(--green);}
+.rule.red{background:rgba(255,79,109,.07);border-color:rgba(255,79,109,.25);border-left:3px solid var(--red);}
+.rule.orange{background:rgba(255,159,67,.07);border-color:rgba(255,159,67,.25);border-left:3px solid var(--orange);}
+.rule.purple{background:rgba(167,139,250,.07);border-color:rgba(167,139,250,.25);border-left:3px solid var(--purple);}
+.rule .rule-t{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:2px;color:var(--text3);margin-bottom:6px;}
+.formula-box{
+  background:var(--bg);border:1px solid var(--border);border-radius:10px;
+  padding:12px 14px;margin:10px 0;
+  font-family:'Space Mono',monospace;font-size:15px;font-weight:700;color:var(--teal);
+}
+.formula-box .fl{font-family:'Nunito',sans-serif;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:2px;color:var(--text3);margin-bottom:6px;}
+.tip{background:rgba(249,217,78,.06);border:1px solid rgba(249,217,78,.2);border-radius:10px;padding:12px 14px;margin:10px 0;font-size:13px;font-weight:600;line-height:1.6;}
+.tip::before{content:'💡 ';}
+.warn{background:rgba(255,79,109,.06);border:1px solid rgba(255,79,109,.2);border-radius:10px;padding:12px 14px;margin:10px 0;font-size:13px;font-weight:600;line-height:1.6;}
+.warn::before{content:'⚠️ ';}
+
+/* DIVIDERS */
+.divider{display:flex;align-items:center;gap:14px;margin:28px 0;}
+.divider span{font-size:14px;font-weight:800;color:var(--text2);white-space:nowrap;font-family:'Syne',sans-serif;}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* SCORE GLOBAL */
+#gscore{
+  font-family:'Space Mono',monospace;font-size:13px;font-weight:700;
+  background:linear-gradient(135deg,var(--green),#1ea876);
+  color:#fff;padding:5px 14px;border-radius:100px;
+}
+
+/* FILTER TABS */
+.filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;}
+.ftab{
+  padding:7px 16px;border-radius:100px;font-size:13px;font-weight:700;
+  cursor:pointer;border:1px solid var(--border);color:var(--text2);
+  background:var(--surface);transition:all .2s;
+}
+.ftab:hover{color:var(--text);border-color:var(--border2);}
+.ftab.active{background:var(--blue);color:#fff;border-color:var(--blue);}
+
+/* CALCS */
+.calc-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;}
+.calc-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;overflow:hidden;}
+.calc-card-head{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+.calc-card-title{font-size:16px;font-weight:800;}
+.calc-card-body{padding:20px 22px;}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;}
+.field label{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:2px;color:var(--text2);}
+.field input,.field select{
+  background:var(--bg);border:1px solid var(--border);border-radius:10px;
+  padding:11px 14px;color:var(--text);font-size:15px;font-family:'Space Mono',monospace;font-weight:600;
+  outline:none;transition:border-color .2s;width:100%;
+}
+.field input:focus,.field select:focus{border-color:var(--blue);}
+.field select option{background:var(--bg);}
+.calc-go{
+  width:100%;padding:13px;background:linear-gradient(135deg,var(--blue),#3a70d4);
+  color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:800;
+  cursor:pointer;font-family:'Nunito',sans-serif;transition:all .2s;
+  box-shadow:0 4px 16px rgba(91,141,239,.25);margin-bottom:12px;
+}
+.calc-go:hover{transform:translateY(-2px);}
+.calc-res{
+  background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:16px;display:none;
+}
+.calc-res.show{display:block;animation:fadeUp .25s ease;}
+.res-lbl{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:2px;color:var(--text3);margin-bottom:8px;}
+.res-val{font-family:'Space Mono',monospace;font-size:24px;font-weight:700;color:var(--green);margin-bottom:8px;}
+.res-steps{font-size:13px;color:var(--text2);line-height:1.8;}
+.res-steps .rs{font-family:'Space Mono',monospace;color:var(--blue2);font-weight:600;}
+
+/* PROGRESS PAGE */
+.progress-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:28px;}
+.prog-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;}
+.prog-icon{font-size:28px;margin-bottom:10px;}
+.prog-title{font-size:14px;font-weight:800;margin-bottom:4px;}
+.prog-sub{font-size:12px;color:var(--text2);margin-bottom:12px;}
+.prog-bar2{height:8px;background:var(--surface2);border-radius:100px;overflow:hidden;}
+.prog-fill2{height:100%;border-radius:100px;transition:width .6s ease;}
+.prog-pct{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;margin-top:6px;}
+
+/* RESPONSIVE */
+@media(max-width:640px){
+  nav{padding:0 14px;}
+  main{padding:20px 14px;}
+  .hero h1{font-size:28px;}
+  .chapters-grid{grid-template-columns:1fr;}
+  .end-grid{grid-template-columns:1fr 1fr;}
+  .videos-grid{grid-template-columns:1fr;}
+  .level-grid{grid-template-columns:repeat(2,1fr);}
+}
+</style>
+</head>
+<body>
+<div class="bg-glow"></div>
+
+<!-- LEVEL MODAL -->
+<div class="modal-overlay" id="level-modal">
+  <div class="modal">
+    <div class="modal-title">📐 Choisis ton niveau</div>
+    <div class="modal-sub">Le site adapte les exercices, le cours et les vidéos à ta classe</div>
+    <div class="level-grid">
+      <div class="level-card" data-level="6e" onclick="setLevel('6e',this)">
+        <div class="level-emoji">🌱</div>
+        <div class="level-name">6ème</div>
+        <div class="level-desc">Fractions · Géométrie · Proportionnalité intro</div>
+      </div>
+      <div class="level-card" data-level="5e" onclick="setLevel('5e',this)">
+        <div class="level-emoji">⚡</div>
+        <div class="level-name">5ème</div>
+        <div class="level-desc">Nombres relatifs · Proportionnalité · Puissances</div>
+      </div>
+      <div class="level-card" data-level="4e" onclick="setLevel('4e',this)">
+        <div class="level-emoji">🔥</div>
+        <div class="level-name">4ème</div>
+        <div class="level-desc">Algèbre · Pythagore · Probabilités</div>
+      </div>
+      <div class="level-card" data-level="3e" onclick="setLevel('3e',this)">
+        <div class="level-emoji">🏆</div>
+        <div class="level-name">3ème</div>
+        <div class="level-desc">Équations · Fonctions · Statistiques · Brevet</div>
+      </div>
+    </div>
+    <button class="modal-close" onclick="closeLevelModal()">✓ Valider mon niveau</button>
+  </div>
+</div>
+
+<!-- VIDEO MODAL -->
+<div class="video-modal-overlay" id="video-modal">
+  <div class="video-modal">
+    <div class="video-modal-header">
+      <div class="video-modal-title" id="video-modal-title">Vidéo</div>
+      <button class="video-modal-close" onclick="closeVideoModal()">✕ Fermer</button>
+    </div>
+    <div class="video-iframe-wrap">
+      <iframe id="video-iframe" src="" allowfullscreen allow="autoplay"></iframe>
+    </div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">📐 MathRév</div>
+  <div class="nav-center">
+    <button class="nav-btn active" onclick="goTab('accueil',this)">🏠 Accueil</button>
+    <button class="nav-btn" onclick="goTab('cours',this)">📚 Cours</button>
+    <button class="nav-btn" onclick="goTab('exercices',this)">✏️ Exercices</button>
+    <button class="nav-btn" onclick="goTab('videos',this)">🎬 Vidéos</button>
+    <button class="nav-btn" onclick="goTab('quiz',this)">🎯 Quiz</button>
+    <button class="nav-btn" onclick="goTab('calculatrices',this)">🧮 Calculatrices</button>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <div class="level-badge" onclick="document.getElementById('level-modal').classList.add('show')">
+      <div class="level-dot"></div>
+      <span id="level-label">5ème</span>
+    </div>
+    <span id="gscore">0 pts</span>
+  </div>
+</nav>
+
+<main>
+
+<!-- ═══════════════════════════════ ACCUEIL ═══════════════════════════════ -->
+<div class="section active" id="tab-accueil">
+  <div class="hero">
+    <h1>Révise les maths<br>comme un <span class="grad">pro</span> 🚀</h1>
+    <p>Cours complets, exercices interactifs, vidéos YouTube, quiz — tout pour réussir ton année !</p>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="hero-stat-val">4</div><div class="hero-stat-label">Niveaux</div></div>
+      <div class="hero-stat"><div class="hero-stat-val">20+</div><div class="hero-stat-label">Exercices</div></div>
+      <div class="hero-stat"><div class="hero-stat-val">15+</div><div class="hero-stat-label">Vidéos</div></div>
+      <div class="hero-stat"><div class="hero-stat-val">20</div><div class="hero-stat-label">Quiz questions</div></div>
+    </div>
+  </div>
+
+  <div class="divider"><span>📚 CHAPITRES DISPONIBLES</span></div>
+  <div class="chapters-grid">
+    <div class="chapter-card" onclick="goTab('cours',null)">
+      <div class="chapter-card-top">
+        <div class="chapter-icon">🔗</div>
+        <span class="chapter-level-tag tag-5e">5ème</span>
+        <div class="chapter-title">Proportionnalité</div>
+        <div class="chapter-desc">Tableaux, règle de 3, coefficient, pourcentages. Maîtrise une des notions les plus importantes du collège.</div>
+      </div>
+      <div class="chapter-bottom">
+        <div class="chapter-meta">⭐ 8 questions quiz · ✏️ 6 exos</div>
+        <div class="chapter-arrow">→</div>
+      </div>
+      <div class="progress-mini"><div class="progress-mini-fill" style="width:0%" id="prog-prop"></div></div>
+    </div>
+    <div class="chapter-card" onclick="goTab('cours',null)">
+      <div class="chapter-card-top">
+        <div class="chapter-icon">±</div>
+        <span class="chapter-level-tag tag-5e">5ème</span>
+        <div class="chapter-title">Nombres relatifs</div>
+        <div class="chapter-desc">Positifs et négatifs, addition, soustraction, multiplication, division. La règle des signes n'aura plus de secrets.</div>
+      </div>
+      <div class="chapter-bottom">
+        <div class="chapter-meta">⭐ 10 questions quiz · ✏️ 6 exos</div>
+        <div class="chapter-arrow">→</div>
+      </div>
+      <div class="progress-mini"><div class="progress-mini-fill" style="width:0%" id="prog-rel"></div></div>
+    </div>
+    <div class="chapter-card">
+      <div class="chapter-card-top">
+        <div class="chapter-icon">📐</div>
+        <span class="chapter-level-tag tag-4e">4ème</span>
+        <div class="chapter-title">Théorème de Pythagore</div>
+        <div class="chapter-desc">Calculer des longueurs dans un triangle rectangle. Démonstration et applications pratiques.</div>
+      </div>
+      <div class="chapter-bottom">
+        <div class="chapter-meta">🔒 Bientôt disponible</div>
+        <div class="chapter-arrow">→</div>
+      </div>
+      <div class="progress-mini"><div class="progress-mini-fill" style="width:0%"></div></div>
+    </div>
+    <div class="chapter-card">
+      <div class="chapter-card-top">
+        <div class="chapter-icon">🔢</div>
+        <span class="chapter-level-tag tag-4e">4ème</span>
+        <div class="chapter-title">Équations du 1er degré</div>
+        <div class="chapter-desc">Résoudre des équations, trouver l'inconnue, vérifier les solutions. Algèbre niveau collège.</div>
+      </div>
+      <div class="chapter-bottom">
+        <div class="chapter-meta">🔒 Bientôt disponible</div>
+        <div class="chapter-arrow">→</div>
+      </div>
+      <div class="progress-mini"><div class="progress-mini-fill" style="width:0%"></div></div>
+    </div>
+    <div class="chapter-card">
+      <div class="chapter-card-top">
+        <div class="chapter-icon">📊</div>
+        <span class="chapter-level-tag tag-3e">3ème</span>
+        <div class="chapter-title">Statistiques & Probabilités</div>
+        <div class="chapter-desc">Moyennes, médiane, fréquence, probabilités simples. Parfait pour préparer le brevet.</div>
+      </div>
+      <div class="chapter-bottom">
+        <div class="chapter-meta">🔒 Bientôt disponible</div>
+        <div class="chapter-arrow">→</div>
+      </div>
+      <div class="progress-mini"><div class="progress-mini-fill" style="width:0%"></div></div>
+    </div>
+    <div class="chapter-card">
+      <div class="chapter-card-top">
+        <div class="chapter-icon">🧮</div>
+        <span class="chapter-level-tag tag-6e">6ème</span>
+        <div class="chapter-title">Fractions</div>
+        <div class="chapter-desc">Addition, soustraction, multiplication, simplification. Les fractions expliquées simplement.</div>
+      </div>
+      <div class="chapter-bottom">
+        <div class="chapter-meta">🔒 Bientôt disponible</div>
+        <div class="chapter-arrow">→</div>
+      </div>
+      <div class="progress-mini"><div class="progress-mini-fill" style="width:0%"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ COURS ═══════════════════════════════ -->
+<div class="section" id="tab-cours">
+  <div class="section-title">📚 Cours complets</div>
+  <div class="section-sub">Toutes les règles, formules et exemples expliqués clairement</div>
+  <div class="filter-row">
+    <div class="ftab active" onclick="filterCours('all',this)">Tous les chapitres</div>
+    <div class="ftab" onclick="filterCours('prop',this)">Proportionnalité</div>
+    <div class="ftab" onclick="filterCours('rel',this)">Nombres relatifs</div>
+  </div>
+  <div class="cours-grid" id="cours-grid">
+    <!-- Proportionnalité cards -->
+    <div class="cours-card" data-cat="prop">
+      <div class="cours-head">
+        <div class="cours-icon" style="background:rgba(91,141,239,.15);">🔗</div>
+        <div><div class="cours-title">Proportionnalité — Définition</div><div class="cours-sub">Coefficient k</div></div>
+      </div>
+      <div class="cours-body">
+        <div class="rule blue"><div class="rule-t">Définition</div>Deux grandeurs sont proportionnelles si leur rapport est toujours le même : <strong>y = k × x</strong> où k est le coefficient de proportionnalité.</div>
+        <div class="formula-box"><div class="fl">Formule clé</div>k = y ÷ x &nbsp;(toujours constant)</div>
+        <div class="rule green"><div class="rule-t">Exemples proportionnels</div>Prix d'articles identiques · Distance à vitesse constante · Conversions d'unités</div>
+        <div class="rule red"><div class="rule-t">NON proportionnel</div>Âge et taille · Prix fixe + tarif variable · Surface d'un carré selon son côté</div>
+        <div class="tip">Le coefficient k est la valeur "pour 1 unité" : prix unitaire, vitesse, taux de change…</div>
+      </div>
+    </div>
+    <div class="cours-card" data-cat="prop">
+      <div class="cours-head">
+        <div class="cours-icon" style="background:rgba(91,141,239,.15);">📐</div>
+        <div><div class="cours-title">Règle de trois</div><div class="cours-sub">Produit en croix</div></div>
+      </div>
+      <div class="cours-body">
+        <div class="rule blue"><div class="rule-t">Méthode</div>Si <strong>a → b</strong>, trouver <strong>x</strong> tel que <strong>c → x</strong></div>
+        <div class="formula-box"><div class="fl">Produit en croix</div>x = (c × b) ÷ a</div>
+        <div class="rule orange"><div class="rule-t">Exemple</div>4 kg coûtent 10€. Combien pour 6 kg ?<br>x = (6 × 10) ÷ 4 = <strong>15 €</strong></div>
+        <div class="tip">Toujours écrire le tableau d'abord : quantité connue → prix connu / quantité inconnue → x</div>
+      </div>
+    </div>
+    <div class="cours-card" data-cat="prop">
+      <div class="cours-head">
+        <div class="cours-icon" style="background:rgba(91,141,239,.15);">%</div>
+        <div><div class="cours-title">Pourcentages</div><div class="cours-sub">4 types de calculs</div></div>
+      </div>
+      <div class="cours-body">
+        <div class="formula-box"><div class="fl">Prendre p% d'une valeur</div>Résultat = Valeur × p ÷ 100</div>
+        <div class="formula-box"><div class="fl">Quel % représente A de B ?</div>p% = (A ÷ B) × 100</div>
+        <div class="formula-box"><div class="fl">Augmentation de p%</div>× (1 + p/100) &nbsp; ex: +20% → × 1,2</div>
+        <div class="formula-box"><div class="fl">Réduction de p%</div>× (1 − p/100) &nbsp; ex: −30% → × 0,7</div>
+        <div class="warn">Attention : une réduction de 20% puis une augmentation de 20% ne redonne PAS le prix initial !</div>
+      </div>
+    </div>
+    <!-- Relatifs cards -->
+    <div class="cours-card" data-cat="rel">
+      <div class="cours-head">
+        <div class="cours-icon" style="background:rgba(46,204,143,.15);">±</div>
+        <div><div class="cours-title">Nombres relatifs</div><div class="cours-sub">Définition et comparaison</div></div>
+      </div>
+      <div class="cours-body">
+        <div class="rule green"><div class="rule-t">Définition</div>Un nombre relatif = un <strong>signe</strong> (+ ou −) + une <strong>valeur absolue</strong><br>|−5| = 5 &nbsp;|&nbsp; |+8| = 8</div>
+        <div class="rule blue"><div class="rule-t">Comparaison</div>Tout positif > tout négatif<br>Entre deux positifs : le plus grand gagne<br>Entre deux négatifs : ⚠️ le plus proche de 0 est le plus grand !</div>
+        <div class="rule orange"><div class="rule-t">Exemple comparaison</div>−3 > −7 car |−3| = 3 < |−7| = 7 (−3 plus proche de 0)</div>
+        <div class="tip">Sur la droite numérique, les nombres sont ordonnés de gauche (petits) à droite (grands).</div>
+      </div>
+    </div>
+    <div class="cours-card" data-cat="rel">
+      <div class="cours-head">
+        <div class="cours-icon" style="background:rgba(46,204,143,.15);">➕➖</div>
+        <div><div class="cours-title">Addition & Soustraction</div><div class="cours-sub">Règles des signes</div></div>
+      </div>
+      <div class="cours-body">
+        <div class="rule green"><div class="rule-t">Simplifier les signes doubles</div>+(+) = + &nbsp;|&nbsp; −(−) = +<br>+(−) = − &nbsp;|&nbsp; −(+) = −</div>
+        <div class="formula-box"><div class="fl">Même signe → additionner</div>(+5) + (+3) = +8<br>(−4) + (−6) = −10</div>
+        <div class="formula-box"><div class="fl">Signes opposés → soustraire</div>(+7) + (−3) = +4<br>(+3) + (−7) = −4</div>
+        <div class="warn">a − (−b) = a + b &nbsp; La soustraction d'un négatif = addition !</div>
+      </div>
+    </div>
+    <div class="cours-card" data-cat="rel">
+      <div class="cours-head">
+        <div class="cours-icon" style="background:rgba(255,159,67,.15);">✖️</div>
+        <div><div class="cours-title">Multiplication & Division</div><div class="cours-sub">La règle d'or</div></div>
+      </div>
+      <div class="cours-body">
+        <div class="rule orange"><div class="rule-t">Règle d'or des signes</div>Même signe → résultat <strong style="color:var(--green)">POSITIF (+)</strong><br>Signes différents → résultat <strong style="color:var(--red)">NÉGATIF (−)</strong></div>
+        <div class="formula-box"><div class="fl">Exemples</div>(+4) × (+3) = +12<br>(−4) × (+3) = −12<br>(−4) × (−3) = +12 ✓</div>
+        <div class="tip">Plusieurs facteurs : compte le nombre de signes −. Pair → + &nbsp; Impair → −</div>
+        <div class="rule purple"><div class="rule-t">Priorités opératoires</div>1. Parenthèses → 2. × et ÷ → 3. + et −</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ EXERCICES ═══════════════════════════════ -->
+<div class="section" id="tab-exercices">
+  <div class="section-title">✏️ Exercices interactifs</div>
+  <div class="section-sub">Réponds aux questions, obtiens des corrections détaillées et gagne des points !</div>
+  <div class="filter-row">
+    <div class="ftab active" onclick="filterExos('all',this)">Tous</div>
+    <div class="ftab" onclick="filterExos('prop',this)">🔵 Proportionnalité</div>
+    <div class="ftab" onclick="filterExos('rel',this)">🟢 Nombres relatifs</div>
+    <div class="ftab" onclick="filterExos('easy',this)">⭐ Facile</div>
+    <div class="ftab" onclick="filterExos('medium',this)">⭐⭐ Moyen</div>
+    <div class="ftab" onclick="filterExos('hard',this)">⭐⭐⭐ Difficile</div>
+  </div>
+  <div class="exo-list" id="exo-list"></div>
+</div>
+
+<!-- ═══════════════════════════════ VIDÉOS ═══════════════════════════════ -->
+<div class="section" id="tab-videos">
+  <div class="section-title">🎬 Vidéos explicatives</div>
+  <div class="section-sub">Les meilleures vidéos YouTube pour comprendre chaque notion — clique pour regarder !</div>
+  <div class="filter-row">
+    <div class="ftab active" onclick="filterVideos('all',this)">Toutes les vidéos</div>
+    <div class="ftab" onclick="filterVideos('prop',this)">Proportionnalité</div>
+    <div class="ftab" onclick="filterVideos('rel',this)">Nombres relatifs</div>
+    <div class="ftab" onclick="filterVideos('meth',this)">Méthodes & Astuces</div>
+  </div>
+  <div class="videos-grid" id="videos-grid"></div>
+</div>
+
+<!-- ═══════════════════════════════ QUIZ ═══════════════════════════════ -->
+<div class="section" id="tab-quiz">
+  <div class="section-title">🎯 Quiz interactif</div>
+  <div class="section-sub">Teste tes connaissances — 20 questions sur la proportionnalité et les nombres relatifs</div>
+  <div class="filter-row" style="margin-bottom:24px;">
+    <div class="ftab active" onclick="startQuiz('all',this)">Tous les thèmes</div>
+    <div class="ftab" onclick="startQuiz('prop',this)">Proportionnalité</div>
+    <div class="ftab" onclick="startQuiz('rel',this)">Nombres relatifs</div>
+  </div>
+  <div class="quiz-wrap">
+    <div class="quiz-topbar">
+      <div style="flex:1">
+        <div class="quiz-prog-txt">Question <span id="q-num">1</span> / <span id="q-total">10</span></div>
+        <div class="prog-bar" style="margin-top:8px"><div class="prog-fill" id="q-prog" style="width:10%"></div></div>
+      </div>
+      <div class="quiz-score-lbl" id="q-scorelbl">0 / 0</div>
+    </div>
+    <div id="quiz-active">
+      <div class="q-card">
+        <div class="q-head">
+          <div class="q-cat" id="q-cat"></div>
+          <div class="q-text" id="q-text"></div>
+          <div class="q-hint" id="q-hint"></div>
+        </div>
+        <div class="q-opts" id="q-opts"></div>
+        <div class="q-exp" id="q-exp">
+          <div class="exp-title" id="exp-title"></div>
+          <div id="exp-body"></div>
+        </div>
+      </div>
+      <div class="quiz-nav">
+        <button class="btn-restart" onclick="startQuiz(currentQFilter,null)">🔄 Recommencer</button>
+        <button class="btn-next" id="btn-next" onclick="nextQ()" disabled>Question suivante →</button>
+      </div>
+    </div>
+    <div class="quiz-end" id="quiz-end">
+      <div class="end-emoji" id="end-emoji"></div>
+      <div class="end-big" id="end-big"></div>
+      <div class="end-msg" id="end-msg"></div>
+      <div class="end-grid">
+        <div class="end-stat"><div class="end-val" style="color:var(--green)" id="end-ok"></div><div class="end-lbl">Correctes</div></div>
+        <div class="end-stat"><div class="end-val" style="color:var(--red)" id="end-ko"></div><div class="end-lbl">Erreurs</div></div>
+        <div class="end-stat"><div class="end-val" style="color:var(--blue2)" id="end-pct"></div><div class="end-lbl">Réussite</div></div>
+      </div>
+      <div class="end-btns">
+        <button class="btn-next" style="padding:14px 28px" onclick="startQuiz(currentQFilter,null)">🔄 Rejouer</button>
+        <button class="btn-restart" style="padding:14px 28px" onclick="goTab('cours',null)">📚 Revoir le cours</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ CALCULATRICES ═══════════════════════════════ -->
+<div class="section" id="tab-calculatrices">
+  <div class="section-title">🧮 Calculatrices interactives</div>
+  <div class="section-sub">Toutes les étapes de calcul affichées — comprends le raisonnement, pas juste le résultat</div>
+  <div class="calc-cards">
+
+    <div class="calc-card">
+      <div class="calc-card-head"><span style="font-size:24px">📐</span><div class="calc-card-title">Règle de trois</div></div>
+      <div class="calc-card-body">
+        <div class="field"><label>Valeur a</label><input type="number" id="c-a" placeholder="ex: 4" step="any"/></div>
+        <div class="field"><label>Valeur b (correspond à a)</label><input type="number" id="c-b" placeholder="ex: 10" step="any"/></div>
+        <div class="field"><label>Valeur c (nouvelle)</label><input type="number" id="c-c" placeholder="ex: 6" step="any"/></div>
+        <button class="calc-go" onclick="calcR3()">Calculer avec les étapes</button>
+        <div class="calc-res" id="cr3">
+          <div class="res-lbl">Résultat</div>
+          <div class="res-val" id="cr3-val"></div>
+          <div class="res-steps" id="cr3-steps"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="calc-card">
+      <div class="calc-card-head"><span style="font-size:24px">%</span><div class="calc-card-title">Calculatrice Pourcentages</div></div>
+      <div class="calc-card-body">
+        <div class="field">
+          <label>Type de calcul</label>
+          <select id="c-ptype" onchange="updatePFields()">
+            <option value="of">Calculer p% d'une valeur</option>
+            <option value="what">Quel % représente A de B ?</option>
+            <option value="inc">Augmentation de p%</option>
+            <option value="dec">Réduction de p%</option>
+          </select>
+        </div>
+        <div class="field"><label id="c-pl1">Valeur totale</label><input type="number" id="c-pv1" placeholder="ex: 200" step="any"/></div>
+        <div class="field"><label id="c-pl2">Pourcentage (%)</label><input type="number" id="c-pv2" placeholder="ex: 30" step="any"/></div>
+        <button class="calc-go" onclick="calcPct()">Calculer</button>
+        <div class="calc-res" id="cpct">
+          <div class="res-lbl">Résultat</div>
+          <div class="res-val" id="cpct-val"></div>
+          <div class="res-steps" id="cpct-steps"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="calc-card">
+      <div class="calc-card-head"><span style="font-size:24px">±</span><div class="calc-card-title">Opérations sur les relatifs</div></div>
+      <div class="calc-card-body">
+        <div class="field"><label>Nombre A</label><input type="number" id="c-ra" placeholder="ex: -5" step="any"/></div>
+        <div class="field">
+          <label>Opération</label>
+          <select id="c-rop">
+            <option value="add">Addition (+)</option>
+            <option value="sub">Soustraction (−)</option>
+            <option value="mul">Multiplication (×)</option>
+            <option value="div">Division (÷)</option>
+          </select>
+        </div>
+        <div class="field"><label>Nombre B</label><input type="number" id="c-rb" placeholder="ex: -3" step="any"/></div>
+        <button class="calc-go" onclick="calcRel()">Calculer avec explication</button>
+        <div class="calc-res" id="crel">
+          <div class="res-lbl">Résultat</div>
+          <div class="res-val" id="crel-val"></div>
+          <div class="res-steps" id="crel-steps"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="calc-card">
+      <div class="calc-card-head"><span style="font-size:24px">📊</span><div class="calc-card-title">Tableau proportionnel ?</div></div>
+      <div class="calc-card-body">
+        <p style="font-size:13px;color:var(--text2);margin-bottom:14px;font-weight:600;">Entrez 4 valeurs du tableau (2×2)</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div class="field"><label>Ligne 1 — Col A</label><input type="number" id="c-ta1" placeholder="ex: 3" step="any"/></div>
+          <div class="field"><label>Ligne 1 — Col B</label><input type="number" id="c-tb1" placeholder="ex: 6" step="any"/></div>
+          <div class="field"><label>Ligne 2 — Col A</label><input type="number" id="c-ta2" placeholder="ex: 5" step="any"/></div>
+          <div class="field"><label>Ligne 2 — Col B</label><input type="number" id="c-tb2" placeholder="ex: 10" step="any"/></div>
+        </div>
+        <button class="calc-go" onclick="calcTab()">Vérifier</button>
+        <div class="calc-res" id="ctab">
+          <div class="res-lbl">Conclusion</div>
+          <div class="res-val" id="ctab-val"></div>
+          <div class="res-steps" id="ctab-steps"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</main>
+
+<script>
+// ══════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════
+let currentLevel = '5e';
+let globalScore = 0;
+let currentQFilter = 'all';
+
+// ══════════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════════
+function goTab(name, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  else {
+    document.querySelectorAll('.nav-btn').forEach(b => {
+      if (b.textContent.toLowerCase().includes(name.slice(0,4))) b.classList.add('active');
+    });
+  }
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+document.querySelectorAll('.nav-btn').forEach((btn,i) => {
+  const names = ['accueil','cours','exercices','videos','quiz','calculatrices'];
+  btn.onclick = function() { goTab(names[i], this); };
+});
+
+// ══════════════════════════════════════════════
+// LEVEL
+// ══════════════════════════════════════════════
+function setLevel(lv, el) {
+  currentLevel = lv;
+  document.querySelectorAll('.level-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('level-label').textContent = lv;
+}
+function closeLevelModal() {
+  document.getElementById('level-modal').classList.remove('show');
+}
+// Show on load
+setTimeout(() => document.getElementById('level-modal').classList.add('show'), 400);
+
+// ══════════════════════════════════════════════
+// SCORE
+// ══════════════════════════════════════════════
+function addScore(pts) {
+  globalScore += pts;
+  document.getElementById('gscore').textContent = globalScore + ' pts';
+}
+
+// ══════════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════════
+const fmt = n => {
+  if (isNaN(n)) return '?';
+  const r = Math.round(n * 10000) / 10000;
+  return r % 1 === 0 ? r.toString() : r.toString();
+};
+
+// ══════════════════════════════════════════════
+// VIDEOS DATA
+// ══════════════════════════════════════════════
+const VIDEOS = [
+  { cat:'prop', title:'La proportionnalité — Cours complet 5ème', channel:'Yvan Monka', duration:'14:32', id:'JHN01WzPJFk', thumb:'https://img.youtube.com/vi/JHN01WzPJFk/hqdefault.jpg' },
+  { cat:'prop', title:'Tableau de proportionnalité — Méthode', channel:'Maths et toi', duration:'08:15', id:'IuBaVuYlQY0', thumb:'https://img.youtube.com/vi/IuBaVuYlQY0/hqdefault.jpg' },
+  { cat:'prop', title:'La règle de trois — Produit en croix', channel:'Yvan Monka', duration:'10:47', id:'UoAw8_DPVFU', thumb:'https://img.youtube.com/vi/UoAw8_DPVFU/hqdefault.jpg' },
+  { cat:'prop', title:'Pourcentages — Cours et exercices 5ème', channel:'Maths Lycée', duration:'12:20', id:'TkSrB4cB7Ck', thumb:'https://img.youtube.com/vi/TkSrB4cB7Ck/hqdefault.jpg' },
+  { cat:'prop', title:'Coefficient de proportionnalité', channel:'Tout le monde peut être fort en maths', duration:'07:44', id:'Xo2lORXxLCk', thumb:'https://img.youtube.com/vi/Xo2lORXxLCk/hqdefault.jpg' },
+  { cat:'rel', title:'Les nombres relatifs — Introduction', channel:'Yvan Monka', duration:'11:03', id:'0mbnc3zxBYg', thumb:'https://img.youtube.com/vi/0mbnc3zxBYg/hqdefault.jpg' },
+  { cat:'rel', title:'Addition et soustraction de relatifs', channel:'Yvan Monka', duration:'09:58', id:'7VJVEHMjB1s', thumb:'https://img.youtube.com/vi/7VJVEHMjB1s/hqdefault.jpg' },
+  { cat:'rel', title:'Multiplication et division des relatifs', channel:'Maths et toi', duration:'08:30', id:'EV4bXq3FJFI', thumb:'https://img.youtube.com/vi/EV4bXq3FJFI/hqdefault.jpg' },
+  { cat:'rel', title:'Règle des signes — La méthode simple', channel:'Mathrix', duration:'06:12', id:'5OJCmOBkniQ', thumb:'https://img.youtube.com/vi/5OJCmOBkniQ/hqdefault.jpg' },
+  { cat:'meth', title:'Priorité des opérations — Cours complet', channel:'Yvan Monka', duration:'13:20', id:'q_Sf2VJ7h4A', thumb:'https://img.youtube.com/vi/q_Sf2VJ7h4A/hqdefault.jpg' },
+  { cat:'meth', title:'Comment bien réviser les maths ?', channel:'Mathrix', duration:'09:45', id:'WrjVq1ABmLQ', thumb:'https://img.youtube.com/vi/WrjVq1ABmLQ/hqdefault.jpg' },
+  { cat:'meth', title:'Astuce pour ne plus se tromper de signe', channel:'Maths Lycée', duration:'05:33', id:'J9MKiPW5oL8', thumb:'https://img.youtube.com/vi/J9MKiPW5oL8/hqdefault.jpg' },
+];
+
+function renderVideos(filter) {
+  const grid = document.getElementById('videos-grid');
+  const list = filter === 'all' ? VIDEOS : VIDEOS.filter(v => v.cat === filter);
+  grid.innerHTML = list.map(v => `
+    <div class="video-card" onclick="openVideo('${v.id}','${v.title}')">
+      <div class="video-thumb">
+        <img src="${v.thumb}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.background='var(--surface2)'" alt="${v.title}"/>
+        <div class="video-play-overlay">
+          <div class="play-btn"><div class="play-icon"></div></div>
+        </div>
+      </div>
+      <div class="video-info">
+        <div class="video-title">${v.title}</div>
+        <div class="video-meta">
+          <span style="color:var(--text3)">📺 ${v.channel}</span>
+          <span class="video-duration">${v.duration}</span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+renderVideos('all');
+
+function filterVideos(f, el) {
+  document.querySelectorAll('#tab-videos .ftab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderVideos(f);
+}
+
+function openVideo(id, title) {
+  document.getElementById('video-modal-title').textContent = title;
+  document.getElementById('video-iframe').src = `https://www.youtube.com/embed/${id}?autoplay=1`;
+  document.getElementById('video-modal').classList.add('show');
+}
+function closeVideoModal() {
+  document.getElementById('video-modal').classList.remove('show');
+  document.getElementById('video-iframe').src = '';
+}
+
+// ══════════════════════════════════════════════
+// EXERCICES DATA
+// ══════════════════════════════════════════════
+const EXOS = [
+  {
+    id:'e1', cat:'prop', diff:'easy', title:'Coefficient de proportionnalité',
+    type:'input',
+    problem:'3 stylos coûtent <strong>4,50 €</strong>. Quel est le prix de <strong>7 stylos</strong> ? (situation proportionnelle)',
+    hint:'Calcule d\'abord le prix d\'un stylo : k = 4,50 ÷ 3, puis multiplie par 7.',
+    answer:'10.5', answerDisplay:'10,50 €',
+    solution:'k = 4,50 ÷ 3 = 1,50 €/stylo\n7 × 1,50 = 10,50 €',
+    solMath:'k = 4,50÷3 = 1,50 | 7 × 1,50 = 10,50 €'
+  },
+  {
+    id:'e2', cat:'prop', diff:'easy', title:'Tableau de proportionnalité',
+    type:'qcm',
+    problem:'Le tableau est-il proportionnel ?\nLigne 1 : &nbsp;2 &nbsp;— &nbsp;5 &nbsp;— &nbsp;8\nLigne 2 : &nbsp;6 &nbsp;— 15 — 24',
+    hint:'Calcule Ligne2 ÷ Ligne1 pour chaque colonne.',
+    options:['Oui, k = 3','Non, les rapports sont différents','Oui, k = 2','Impossible à déterminer'],
+    answer:0,
+    solution:'6÷2=3 ✓ | 15÷5=3 ✓ | 24÷8=3 ✓ → Proportionnel avec k = 3',
+    solMath:'6÷2 = 15÷5 = 24÷8 = 3'
+  },
+  {
+    id:'e3', cat:'prop', diff:'medium', title:'Règle de trois',
+    type:'input',
+    problem:'Une voiture roule à vitesse constante. Elle parcourt <strong>240 km en 3h</strong>.\nQuelle distance parcourt-elle en <strong>5h</strong> ?',
+    hint:'Trouve la vitesse (k = distance ÷ temps) puis calcule pour 5h.',
+    answer:'400', answerDisplay:'400 km',
+    solution:'k = 240 ÷ 3 = 80 km/h\n5 × 80 = 400 km',
+    solMath:'k=240÷3=80 km/h | 5×80=400 km'
+  },
+  {
+    id:'e4', cat:'prop', diff:'medium', title:'Pourcentage d\'une valeur',
+    type:'input',
+    problem:'Un article vaut <strong>80 €</strong>. Il est soldé à <strong>−25%</strong>.\nQuel est le nouveau prix ?',
+    hint:'Coefficient multiplicateur = 1 − 25/100 = 0,75',
+    answer:'60', answerDisplay:'60 €',
+    solution:'Coefficient : 1 − 0,25 = 0,75\n80 × 0,75 = 60 €',
+    solMath:'80 × 0,75 = 60 €'
+  },
+  {
+    id:'e5', cat:'prop', diff:'hard', title:'Pourcentage d\'augmentation',
+    type:'input',
+    problem:'Un prix passe de <strong>50 € à 65 €</strong>.\nQuel est le pourcentage d\'augmentation ?',
+    hint:'((Nouveau − Ancien) ÷ Ancien) × 100',
+    answer:'30', answerDisplay:'30 %',
+    solution:'Augmentation = 65 − 50 = 15\n(15 ÷ 50) × 100 = 30%',
+    solMath:'(65−50)÷50 × 100 = 30%'
+  },
+  {
+    id:'e6', cat:'prop', diff:'hard', title:'Recette proportionnelle',
+    type:'input',
+    problem:'Une recette pour <strong>4 personnes</strong> nécessite <strong>300 g de farine</strong>.\nCombien de grammes pour <strong>7 personnes</strong> ?',
+    hint:'Règle de 3 : x = (7 × 300) ÷ 4',
+    answer:'525', answerDisplay:'525 g',
+    solution:'x = (7 × 300) ÷ 4 = 2100 ÷ 4 = 525 g',
+    solMath:'(7×300)÷4 = 525 g'
+  },
+  {
+    id:'e7', cat:'rel', diff:'easy', title:'Addition de relatifs',
+    type:'input',
+    problem:'Calcule : &nbsp;<span style="font-family:Space Mono,monospace;color:var(--teal);">(−8) + (−5)</span>',
+    hint:'Même signe → additionner les valeurs absolues et garder le signe.',
+    answer:'-13', answerDisplay:'−13',
+    solution:'Même signe (−) → 8 + 5 = 13 → signe − → −13',
+    solMath:'(−8)+(−5) = −(8+5) = −13'
+  },
+  {
+    id:'e8', cat:'rel', diff:'easy', title:'Soustraction de relatifs',
+    type:'qcm',
+    problem:'Calcule : &nbsp;<span style="font-family:Space Mono,monospace;color:var(--teal);">5 − (−3)</span>',
+    hint:'Soustraire un négatif = ajouter ! −(−) = +',
+    options:['2','−2','8','−8'],
+    answer:2,
+    solution:'5 − (−3) = 5 + 3 = 8\n(Soustraire un négatif revient à ajouter son opposé)',
+    solMath:'5 − (−3) = 5 + (+3) = 8'
+  },
+  {
+    id:'e9', cat:'rel', diff:'medium', title:'Multiplication de relatifs',
+    type:'input',
+    problem:'Calcule : &nbsp;<span style="font-family:Space Mono,monospace;color:var(--teal);">(−4) × (−7)</span>',
+    hint:'Règle des signes : − × − = ?',
+    answer:'28', answerDisplay:'+28',
+    solution:'− × − = + (même signe → positif)\n4 × 7 = 28 → résultat : +28',
+    solMath:'(−4)×(−7) = +(4×7) = +28'
+  },
+  {
+    id:'e10', cat:'rel', diff:'medium', title:'Comparaison de relatifs',
+    type:'qcm',
+    problem:'Range dans l\'ordre <strong>croissant</strong> : &nbsp;<span style="font-family:Space Mono,monospace;color:var(--teal);">−5 &nbsp; +2 &nbsp; −1 &nbsp; +7 &nbsp; 0</span>',
+    hint:'Sur la droite numérique, de gauche à droite.',
+    options:['−5, −1, 0, +2, +7','−1, −5, 0, +2, +7','+7, +2, 0, −1, −5','0, −1, +2, −5, +7'],
+    answer:0,
+    solution:'Ordre croissant : −5 < −1 < 0 < +2 < +7',
+    solMath:'−5 < −1 < 0 < +2 < +7'
+  },
+  {
+    id:'e11', cat:'rel', diff:'hard', title:'Calcul d\'expression complexe',
+    type:'input',
+    problem:'Calcule en respectant les priorités :\n<span style="font-family:Space Mono,monospace;color:var(--teal);">(−3) + (−2) × (4 − 7)</span>',
+    hint:'1. Parenthèses → 2. Multiplication → 3. Addition',
+    answer:'3', answerDisplay:'+3',
+    solution:'1. Parenthèses : 4−7 = −3\n2. × : (−2)×(−3) = +6\n3. + : (−3)+6 = +3',
+    solMath:'(−3)+(−2)×(4−7) → (−3)+6 = +3'
+  },
+  {
+    id:'e12', cat:'rel', diff:'hard', title:'Plusieurs facteurs',
+    type:'qcm',
+    problem:'Calcule : &nbsp;<span style="font-family:Space Mono,monospace;color:var(--teal);">(−3) × (+2) × (−4)</span>',
+    hint:'Compte le nombre de signes − : pair → positif, impair → négatif',
+    options:['−24','+24','+12','−12'],
+    answer:1,
+    solution:'Nombre de signes − : 2 (pair) → résultat positif\n3 × 2 × 4 = 24 → +24',
+    solMath:'2 signes − (pair) → + | 3×2×4 = 24 → +24'
+  },
+];
+
+function renderExos(filter) {
+  const list = document.getElementById('exo-list');
+  let filtered;
+  if (filter === 'all') filtered = EXOS;
+  else if (filter === 'prop') filtered = EXOS.filter(e => e.cat === 'prop');
+  else if (filter === 'rel') filtered = EXOS.filter(e => e.cat === 'rel');
+  else if (filter === 'easy') filtered = EXOS.filter(e => e.diff === 'easy');
+  else if (filter === 'medium') filtered = EXOS.filter(e => e.diff === 'medium');
+  else if (filter === 'hard') filtered = EXOS.filter(e => e.diff === 'hard');
+  else filtered = EXOS;
+
+  const diffStars = { easy:'⭐', medium:'⭐⭐', hard:'⭐⭐⭐' };
+  const catLabel = { prop:'🔵 Proportionnalité', rel:'🟢 Relatifs' };
+
+  list.innerHTML = filtered.map((e,i) => {
+    const opts = e.type === 'qcm' ? `
+      <div class="qcm-options" id="qcm-${e.id}">
+        ${e.options.map((o,j) => `<button class="qcm-opt" onclick="checkQcm('${e.id}',${j},${e.answer},'${escStr(e.solution)}','${escStr(e.solMath)}')" id="qopt-${e.id}-${j}"><span class="qcm-letter">${'ABCD'[j]}</span>${o}</button>`).join('')}
+      </div>` : `
+      <div class="answer-zone">
+        <div class="answer-label">Votre réponse</div>
+        <input class="answer-input" type="text" id="ans-${e.id}" placeholder="Écris ta réponse ici…" onkeydown="if(event.key==='Enter')checkInput('${e.id}','${e.answer}','${escStr(e.answerDisplay)}','${escStr(e.solution)}','${escStr(e.solMath)}')"/>
+      </div>
+      <div class="exo-actions">
+        <button class="btn-check" onclick="checkInput('${e.id}','${e.answer}','${escStr(e.answerDisplay)}','${escStr(e.solution)}','${escStr(e.solMath)}')">✓ Vérifier</button>
+        <button class="btn-hint" onclick="showHint('${e.id}','${escStr(e.hint)}')">💡 Indice</button>
+        <button class="btn-solution" onclick="showSolution('${e.id}','${escStr(e.answerDisplay||e.answer)}','${escStr(e.solution)}','${escStr(e.solMath)}')">👁 Solution</button>
+      </div>`;
+
+    return `
+    <div class="exo-card" data-cat="${e.cat}" data-diff="${e.diff}" id="exo-${e.id}">
+      <div class="exo-header" onclick="toggleExo('${e.id}')">
+        <div class="exo-num" id="enum-${e.id}">${String(i+1).padStart(2,'0')}</div>
+        <div class="exo-info">
+          <div class="exo-title">${e.title}</div>
+          <div class="exo-meta">${catLabel[e.cat]} · <span class="diff-stars">${diffStars[e.diff]}</span></div>
+        </div>
+        <div class="exo-toggle" id="etog-${e.id}">▼</div>
+      </div>
+      <div class="exo-body" id="ebody-${e.id}">
+        <div class="exo-problem">${e.problem.replace(/\n/g,'<br>')}</div>
+        ${opts}
+        <div class="feedback-box" id="fb-${e.id}"></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function escStr(s) {
+  if (!s) return '';
+  return (s+'').replace(/'/g,"&#39;").replace(/\n/g,'\\n');
+}
+function unescStr(s) {
+  return s.replace(/&#39;/g,"'").replace(/\\n/g,'\n');
+}
+
+renderExos('all');
+
+function filterExos(f, el) {
+  document.querySelectorAll('#tab-exercices .ftab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderExos(f);
+}
+
+function toggleExo(id) {
+  const body = document.getElementById('ebody-' + id);
+  const tog = document.getElementById('etog-' + id);
+  body.classList.toggle('open');
+  tog.classList.toggle('open');
+}
+
+function checkInput(id, correct, display, solution, solMath) {
+  const inp = document.getElementById('ans-' + id);
+  const fb = document.getElementById('fb-' + id);
+  const val = inp.value.trim().replace(',','.');
+  const isOk = parseFloat(val) === parseFloat(correct) || val === correct;
+
+  inp.classList.remove('correct','wrong');
+  inp.classList.add(isOk ? 'correct' : 'wrong');
+
+  if (isOk) {
+    fb.className = 'feedback-box ok';
+    fb.innerHTML = `✅ Bonne réponse ! Résultat : <strong>${unescStr(display) || correct}</strong>
+      <div class="sol-math">${unescStr(solMath)}</div>`;
+    document.getElementById('enum-' + id).classList.add('done');
+    document.getElementById('enum-' + id).textContent = '✓';
+    addScore(5);
+  } else {
+    fb.className = 'feedback-box ko';
+    fb.innerHTML = `❌ Pas tout à fait… Réessaie ou clique sur "Solution".<br><small style="color:var(--text3)">Ta réponse : ${inp.value}</small>`;
+  }
+}
+
+function checkQcm(id, idx, correct, solution, solMath) {
+  const opts = document.querySelectorAll(`#qcm-${id} .qcm-opt`);
+  opts.forEach((o,i) => {
+    o.setAttribute('disabled','true');
+    if (i === correct) o.classList.add('correct');
+    else if (i === idx && idx !== correct) o.classList.add('wrong');
+  });
+  const fb = document.getElementById('fb-' + id);
+  const isOk = idx === correct;
+  if (isOk) {
+    fb.className = 'feedback-box ok';
+    fb.innerHTML = `✅ Bonne réponse !<div class="sol-math">${unescStr(solMath)}</div>`;
+    document.getElementById('enum-' + id).classList.add('done');
+    document.getElementById('enum-' + id).textContent = '✓';
+    addScore(5);
+  } else {
+    fb.className = 'feedback-box ko';
+    fb.innerHTML = `❌ Mauvaise réponse. Voici la correction :<br>${unescStr(solution).replace(/\n/g,'<br>')}
+      <div class="sol-math">${unescStr(solMath)}</div>`;
+  }
+}
+
+function showHint(id, hint) {
+  const fb = document.getElementById('fb-' + id);
+  fb.className = 'feedback-box hint';
+  fb.innerHTML = `💡 Indice : ${unescStr(hint)}`;
+}
+
+function showSolution(id, display, solution, solMath) {
+  const fb = document.getElementById('fb-' + id);
+  fb.className = 'feedback-box ok';
+  fb.innerHTML = `👁 Solution : <strong>${unescStr(display)}</strong><br>${unescStr(solution).replace(/\n/g,'<br>')}
+    <div class="sol-math">${unescStr(solMath)}</div>`;
+}
+
+// ══════════════════════════════════════════════
+// COURS FILTER
+// ══════════════════════════════════════════════
+function filterCours(f, el) {
+  document.querySelectorAll('#tab-cours .ftab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.cours-card').forEach(c => {
+    c.style.display = (f === 'all' || c.dataset.cat === f) ? '' : 'none';
+  });
+}
+
+// ══════════════════════════════════════════════
+// QUIZ
+// ══════════════════════════════════════════════
+const QUIZ = [
+  { cat:'prop', cl:'🔵 Proportionnalité', cc:'var(--blue)', text:'Si 5 stylos coûtent 7,50€, combien coûtent 8 stylos ?', hint:'(8 × 7,50) ÷ 5', options:['10,00 €','12,00 €','9,50 €','11,50 €'], correct:1, exp:'k = 7,50÷5 = 1,50 €/stylo\n8 × 1,50 = 12,00 €', expMath:'x = (8×7,50)÷5 = 12,00 €' },
+  { cat:'prop', cl:'🔵 Proportionnalité', cc:'var(--blue)', text:'Le tableau est proportionnel ? Ligne 1: 2, 5, 8 — Ligne 2: 6, 15, 24', hint:'Calcule Ligne2÷Ligne1 pour chaque colonne', options:['Oui, k=3','Non','Oui, k=2','Impossible'], correct:0, exp:'6÷2=3 ✓ | 15÷5=3 ✓ | 24÷8=3 ✓', expMath:'k=3 pour toutes les colonnes' },
+  { cat:'prop', cl:'🔵 Proportionnalité', cc:'var(--blue)', text:'30% de 120 = ?', hint:'120 × 30 ÷ 100', options:['30','36','40','32'], correct:1, exp:'120 × 30 ÷ 100 = 36', expMath:'120 × 0,30 = 36' },
+  { cat:'prop', cl:'🔵 Proportionnalité', cc:'var(--blue)', text:'Un article coûte 80€, soldé à −25%. Nouveau prix ?', hint:'Coefficient = 1 − 0,25 = 0,75', options:['55 €','60 €','65 €','70 €'], correct:1, exp:'80 × 0,75 = 60 €', expMath:'80 × (1−0,25) = 60 €' },
+  { cat:'prop', cl:'🔵 Proportionnalité', cc:'var(--blue)', text:'15 représente quel pourcentage de 60 ?', hint:'(A÷B) × 100', options:['20%','25%','30%','15%'], correct:1, exp:'(15÷60)×100 = 25%', expMath:'(15÷60)×100 = 25%' },
+  { cat:'prop', cl:'🔵 Proportionnalité', cc:'var(--blue)', text:'Pour 4 kg on paie 10€. Combien pour 6 kg ?', hint:'x = (6×10)÷4', options:['12€','15€','14€','16€'], correct:1, exp:'x = (6×10)÷4 = 15€', expMath:'produit en croix → 60÷4 = 15€' },
+  { cat:'prop', cl:'🔵 Proportionnalité', cc:'var(--blue)', text:'Un prix passe de 50€ à 65€. Quel % d\'augmentation ?', hint:'((65−50)÷50) × 100', options:['25%','30%','28%','20%'], correct:1, exp:'(15÷50)×100 = 30%', expMath:'(65−50)÷50×100 = 30%' },
+  { cat:'prop', cl:'🔵 Proportionnalité', cc:'var(--blue)', text:'Recette pour 4 personnes : 300g de farine. Combien pour 7 personnes ?', hint:'(7×300)÷4', options:['500g','525g','475g','550g'], correct:1, exp:'(7×300)÷4 = 525g', expMath:'x = 2100÷4 = 525g' },
+  { cat:'prop', cl:'🔵 Proportionnalité', cc:'var(--blue)', text:'Quel est le coefficient k si x=4 → y=14 ?', hint:'k = y÷x', options:['k=2,5','k=3','k=3,5','k=4'], correct:2, exp:'k = 14÷4 = 3,5', expMath:'k = y÷x = 14÷4 = 3,5' },
+  { cat:'prop', cl:'🔵 Proportionnalité', cc:'var(--blue)', text:'Un trajet de 360km à vitesse constante prend 4h. Temps pour 270km ?', hint:'Vitesse = 360÷4 = 90km/h, puis temps = distance÷vitesse', options:['2h','3h','3h30','2h30'], correct:1, exp:'v=360÷4=90km/h | temps=270÷90=3h', expMath:'270÷90 = 3h' },
+  { cat:'rel', cl:'🟢 Nombres relatifs', cc:'var(--green)', text:'Calcule : (−8) + (−5)', hint:'Même signe → additionner les valeurs absolues', options:['−13','−3','+3','+13'], correct:0, exp:'Même signe (−) → 8+5=13 → −13', expMath:'(−8)+(−5) = −13' },
+  { cat:'rel', cl:'🟢 Nombres relatifs', cc:'var(--green)', text:'Calcule : (+6) + (−10)', hint:'Signes opposés → soustraire les valeurs absolues', options:['+4','−4','+16','−16'], correct:1, exp:'Signes opp. |−10|>|+6| → signe − | 10−6=4 → −4', expMath:'(+6)+(−10) = −4' },
+  { cat:'rel', cl:'🟢 Nombres relatifs', cc:'var(--green)', text:'Calcule : 5 − (−3)', hint:'Soustraire un négatif = ajouter !', options:['2','−2','8','−8'], correct:2, exp:'5−(−3) = 5+3 = 8', expMath:'5−(−3) = 5+3 = 8' },
+  { cat:'rel', cl:'🟢 Nombres relatifs', cc:'var(--green)', text:'Calcule : (−4) × (−7)', hint:'− × − = ?', options:['−28','+28','+11','−11'], correct:1, exp:'− × − = + | 4×7=28 → +28', expMath:'(−4)×(−7) = +28' },
+  { cat:'rel', cl:'🟢 Nombres relatifs', cc:'var(--green)', text:'Calcule : (−18) ÷ (+3)', hint:'− ÷ + = ?', options:['+6','−6','+15','−15'], correct:1, exp:'− ÷ + = − | 18÷3=6 → −6', expMath:'(−18)÷(+3) = −6' },
+  { cat:'rel', cl:'🟢 Nombres relatifs', cc:'var(--green)', text:'Lequel est le plus grand : −3 ou −7 ?', hint:'Sur la droite numérique, quel est le plus à droite ?', options:['−7 car 7>3','−3 car plus proche de 0','Ils sont égaux','Impossible'], correct:1, exp:'Entre deux négatifs, le + grand = celui dont |valeur| est la plus petite', expMath:'|−3|=3 < |−7|=7 → −3 > −7' },
+  { cat:'rel', cl:'🟢 Nombres relatifs', cc:'var(--green)', text:'Calcule : (−3) × (+2) × (−4)', hint:'Compte les signes − (pair/impair)', options:['−24','+24','+12','−12'], correct:1, exp:'2 signes − (pair) → positif | 3×2×4=24 → +24', expMath:'2 signes − (pair) → +24' },
+  { cat:'rel', cl:'🟢 Nombres relatifs', cc:'var(--green)', text:'Calcule : (−3) + (−2) × (4 − 7)', hint:'Priorité : parenthèses → × → +', options:['3','+3','−9','−15'], correct:1, exp:'4−7=−3 | (−2)×(−3)=+6 | (−3)+6=+3', expMath:'(−3)+(−2)×(−3) → (−3)+6 = +3' },
+  { cat:'rel', cl:'🟢 Nombres relatifs', cc:'var(--green)', text:'Quelle est la valeur absolue de −15 ?', hint:'Distance à 0, sans signe', options:['−15','15','0','−1'], correct:1, exp:'|−15| = 15 (toujours positif)', expMath:'|−15| = 15' },
+  { cat:'rel', cl:'🟢 Nombres relatifs', cc:'var(--green)', text:'Range en ordre croissant : −5, +2, −1, +7, 0', hint:'De gauche à droite sur la droite numérique', options:['−5, −1, 0, +2, +7','−1, −5, 0, +2, +7','+7, +2, 0, −1, −5','0, −1, +2, −5, +7'], correct:0, exp:'−5 < −1 < 0 < +2 < +7', expMath:'Ordre : −5, −1, 0, +2, +7' },
+];
+
+let qList = [], qIdx = 0, qScore = 0, qTotal = 0, qAnswered = false;
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length-1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+
+function startQuiz(filter, el) {
+  currentQFilter = filter;
+  if (el) { document.querySelectorAll('#tab-quiz .ftab').forEach(t => t.classList.remove('active')); el.classList.add('active'); }
+  qList = shuffle(filter === 'all' ? QUIZ : QUIZ.filter(q => q.cat === filter));
+  qIdx = 0; qScore = 0; qTotal = 0; qAnswered = false;
+  document.getElementById('quiz-end').classList.remove('show');
+  document.getElementById('quiz-active').style.display = 'block';
+  document.getElementById('q-total').textContent = qList.length;
+  renderQ();
+}
+
+function renderQ() {
+  if (qIdx >= qList.length) { showQuizEnd(); return; }
+  const q = qList[qIdx];
+  qAnswered = false;
+  document.getElementById('q-num').textContent = qIdx + 1;
+  document.getElementById('q-prog').style.width = ((qIdx+1)/qList.length*100)+'%';
+  document.getElementById('q-scorelbl').textContent = qScore + ' / ' + qTotal;
+  document.getElementById('btn-next').disabled = true;
+  document.getElementById('q-cat').innerHTML = `<span style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:2.5px;padding:3px 10px;border-radius:100px;background:${q.cc}20;color:${q.cc};border:1px solid ${q.cc}40">${q.cl}</span>`;
+  document.getElementById('q-text').textContent = q.text;
+  document.getElementById('q-hint').textContent = q.hint ? '💡 ' + q.hint : '';
+  const exp = document.getElementById('q-exp');
+  exp.className = 'q-exp';
+  const letters = ['A','B','C','D'];
+  document.getElementById('q-opts').innerHTML = q.options.map((o,i) => `
+    <button class="q-opt" onclick="answerQ(${i})" id="qo-${i}">
+      <span class="opt-ltr">${letters[i]}</span>${o}
+    </button>`).join('');
+}
+
+function answerQ(idx) {
+  if (qAnswered) return;
+  qAnswered = true; qTotal++;
+  const q = qList[qIdx];
+  const ok = idx === q.correct;
+  if (ok) { qScore++; addScore(3); }
+  document.querySelectorAll('.q-opt').forEach((b,i) => {
+    b.disabled = true;
+    if (i === q.correct) b.classList.add('correct');
+    else if (i === idx && !ok) b.classList.add('wrong');
+  });
+  document.getElementById('q-scorelbl').textContent = qScore + ' / ' + qTotal;
+  const exp = document.getElementById('q-exp');
+  exp.className = 'q-exp show ' + (ok ? 'ok' : 'ko');
+  document.getElementById('exp-title').textContent = ok ? '✅ Bonne réponse !' : '❌ Mauvaise réponse';
+  document.getElementById('exp-body').innerHTML = q.exp.replace(/\n/g,'<br>') +
+    (q.expMath ? `<div class="q-exp .exp-math" style="font-family:Space Mono,monospace;font-size:14px;margin-top:6px;color:var(--teal)">${q.expMath}</div>` : '');
+  document.getElementById('btn-next').disabled = false;
+}
+
+function nextQ() { qIdx++; renderQ(); }
+
+function showQuizEnd() {
+  document.getElementById('quiz-active').style.display = 'none';
+  const end = document.getElementById('quiz-end');
+  end.classList.add('show');
+  const pct = Math.round(qScore/qList.length*100);
+  let emoji, color, msg;
+  if (pct===100){emoji='🏆';color='var(--yellow)';msg='Parfait ! Tu maîtrises tout !';}
+  else if (pct>=80){emoji='🌟';color='var(--green)';msg='Excellent ! Quelques détails à revoir.';}
+  else if (pct>=60){emoji='👍';color='var(--blue2)';msg='Bien ! Continue à t\'entraîner !';}
+  else{emoji='📚';color='var(--red)';msg='Relis le cours, tu vas y arriver !';}
+  document.getElementById('end-emoji').textContent = emoji;
+  document.getElementById('end-big').textContent = qScore+'/'+qList.length;
+  document.getElementById('end-big').style.color = color;
+  document.getElementById('end-msg').textContent = msg;
+  document.getElementById('end-ok').textContent = qScore;
+  document.getElementById('end-ko').textContent = qList.length - qScore;
+  document.getElementById('end-pct').textContent = pct+'%';
+}
+
+startQuiz('all', null);
+
+// ══════════════════════════════════════════════
+// CALCULATRICES
+// ══════════════════════════════════════════════
+function calcR3() {
+  const a=parseFloat(document.getElementById('c-a').value);
+  const b=parseFloat(document.getElementById('c-b').value);
+  const c=parseFloat(document.getElementById('c-c').value);
+  if (isNaN(a)||isNaN(b)||isNaN(c)||a===0){alert('Remplis tous les champs (a≠0)');return;}
+  const x=(b*c)/a;
+  const res=document.getElementById('cr3');
+  document.getElementById('cr3-val').textContent='x = '+fmt(x);
+  document.getElementById('cr3-steps').innerHTML=`<span class="rs">Tableau :</span> ${fmt(a)} → ${fmt(b)} | ${fmt(c)} → x<br><span class="rs">Produit en croix :</span> x = (${fmt(c)} × ${fmt(b)}) ÷ ${fmt(a)}<br>x = ${fmt(c*b)} ÷ ${fmt(a)} = <strong>${fmt(x)}</strong><br><span class="rs">Coefficient k :</span> ${fmt(b)}÷${fmt(a)} = <strong>${fmt(b/a)}</strong>`;
+  res.classList.add('show');
+}
+
+function updatePFields() {
+  const t=document.getElementById('c-ptype').value;
+  const l1=document.getElementById('c-pl1'),l2=document.getElementById('c-pl2');
+  if(t==='of'){l1.textContent='Valeur totale';l2.textContent='Pourcentage (%)';}
+  else if(t==='what'){l1.textContent='Partie A';l2.textContent='Total B';}
+  else if(t==='inc'){l1.textContent='Valeur initiale';l2.textContent='Augmentation (%)';}
+  else{l1.textContent='Valeur initiale';l2.textContent='Réduction (%)';}
+  document.getElementById('cpct').classList.remove('show');
+}
+
+function calcPct() {
+  const t=document.getElementById('c-ptype').value;
+  const v1=parseFloat(document.getElementById('c-pv1').value);
+  const v2=parseFloat(document.getElementById('c-pv2').value);
+  if(isNaN(v1)||isNaN(v2)){alert('Remplis les deux valeurs');return;}
+  let val,steps;
+  const res=document.getElementById('cpct');
+  if(t==='of'){
+    val=v1*v2/100;
+    document.getElementById('cpct-val').textContent=fmt(v2)+'% de '+fmt(v1)+' = '+fmt(val);
+    steps=`<span class="rs">Formule :</span> ${fmt(v1)} × ${fmt(v2)} ÷ 100 = <strong>${fmt(val)}</strong>`;
+  } else if(t==='what'){
+    if(v2===0){alert('B ne peut pas être 0');return;}
+    val=(v1/v2)*100;
+    document.getElementById('cpct-val').textContent=fmt(v1)+' = '+fmt(val)+'% de '+fmt(v2);
+    steps=`<span class="rs">Formule :</span> (${fmt(v1)} ÷ ${fmt(v2)}) × 100 = <strong>${fmt(val)}%</strong>`;
+  } else if(t==='inc'){
+    val=v1*(1+v2/100);
+    document.getElementById('cpct-val').textContent=fmt(v1)+' + '+fmt(v2)+'% = '+fmt(val);
+    steps=`<span class="rs">Coeff :</span> 1 + ${fmt(v2)}/100 = ${fmt(1+v2/100)}<br>${fmt(v1)} × ${fmt(1+v2/100)} = <strong>${fmt(val)}</strong>`;
+  } else {
+    val=v1*(1-v2/100);
+    document.getElementById('cpct-val').textContent=fmt(v1)+' − '+fmt(v2)+'% = '+fmt(val);
+    steps=`<span class="rs">Coeff :</span> 1 − ${fmt(v2)}/100 = ${fmt(1-v2/100)}<br>${fmt(v1)} × ${fmt(1-v2/100)} = <strong>${fmt(val)}</strong>`;
+  }
+  document.getElementById('cpct-steps').innerHTML=steps;
+  res.classList.add('show');
+}
+
+function calcRel() {
+  const a=parseFloat(document.getElementById('c-ra').value);
+  const op=document.getElementById('c-rop').value;
+  const b=parseFloat(document.getElementById('c-rb').value);
+  if(isNaN(a)||isNaN(b)){alert('Entrez les deux nombres');return;}
+  if(op==='div'&&b===0){alert('Division par zéro impossible');return;}
+  let result,opSym,expl;
+  const sA=a>=0?'positif':'négatif', sB=b>=0?'positif':'négatif';
+  if(op==='add'){
+    result=a+b; opSym='+';
+    const same=(a>=0)===(b>=0);
+    expl=same?`Même signe (${sA}) → additionner : ${fmt(Math.abs(a))}+${fmt(Math.abs(b))}=${fmt(Math.abs(a)+Math.abs(b))}, signe ${result>=0?'+':'−'}`:`Signes opposés → soustraire : |${fmt(Math.abs(a))}−${fmt(Math.abs(b))}|=${fmt(Math.abs(a-b))}, signe ${result>=0?'+':'−'}`;
+  } else if(op==='sub'){
+    result=a-b; opSym='−';
+    expl=`Soustraction = addition de l'opposé :<br>(${fmt(a)}) − (${fmt(b)}) = (${fmt(a)}) + (${fmt(-b)})${b<0?' ← deux − font + !':''}`;
+  } else if(op==='mul'){
+    result=a*b; opSym='×';
+    const same=(a>=0)===(b>=0);
+    expl=`Règle des signes : ${sA} × ${sB} → ${same?'même signe → <strong style="color:var(--green)">POSITIF</strong>':'signes diff → <strong style="color:var(--red)">NÉGATIF</strong>'}<br>|${fmt(a)}| × |${fmt(b)}| = ${fmt(Math.abs(a*b))}`;
+  } else {
+    result=a/b; opSym='÷';
+    const same=(a>=0)===(b>=0);
+    expl=`Règle des signes : ${sA} ÷ ${sB} → ${same?'même signe → <strong style="color:var(--green)">POSITIF</strong>':'signes diff → <strong style="color:var(--red)">NÉGATIF</strong>'}<br>|${fmt(a)}| ÷ |${fmt(b)}| = ${fmt(Math.abs(a/b))}`;
+  }
+  const res=document.getElementById('crel');
+  document.getElementById('crel-val').textContent=`(${fmt(a)}) ${opSym} (${fmt(b)}) = ${fmt(result)}`;
+  document.getElementById('crel-steps').innerHTML=`<span class="rs">Étapes :</span><br>${expl}<br><br><strong>Résultat : ${fmt(result)}</strong>`;
+  res.classList.add('show');
+}
+
+function calcTab() {
+  const a1=parseFloat(document.getElementById('c-ta1').value);
+  const b1=parseFloat(document.getElementById('c-tb1').value);
+  const a2=parseFloat(document.getElementById('c-ta2').value);
+  const b2=parseFloat(document.getElementById('c-tb2').value);
+  if(isNaN(a1)||isNaN(b1)||isNaN(a2)||isNaN(b2)||a1===0||b1===0){alert('Remplis toutes les cases');return;}
+  const k1=a2/a1, k2=b2/b1;
+  const isProp=Math.abs(k1-k2)<0.0001;
+  const res=document.getElementById('ctab');
+  document.getElementById('ctab-val').textContent=isProp?'✅ PROPORTIONNEL':'❌ NON PROPORTIONNEL';
+  document.getElementById('ctab-val').style.color=isProp?'var(--green)':'var(--red)';
+  document.getElementById('ctab-steps').innerHTML=`<span class="rs">Quotients :</span><br>Col A: ${fmt(a2)}÷${fmt(a1)} = <strong>${fmt(k1)}</strong><br>Col B: ${fmt(b2)}÷${fmt(b1)} = <strong>${fmt(k2)}</strong><br>${isProp?'✅ Quotients égaux → proportionnel avec k='+fmt(k1):'❌ Quotients différents → non proportionnel'}<br><br><span class="rs">Produits en croix :</span> ${fmt(a1)}×${fmt(b2)}=${fmt(a1*b2)} et ${fmt(b1)}×${fmt(a2)}=${fmt(b1*a2)} → ${Math.abs(a1*b2-b1*a2)<0.0001?'égaux ✅':'différents ❌'}`;
+  res.classList.add('show');
+}
+</script>
+</body>
+</html>
